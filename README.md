@@ -5,7 +5,7 @@ Adrian Gheorghiu
 Nazanin Niayesh
 
 ## Abstract
-In this project, we will train a classifier model to assign an emotion such as anger or happiness to a given expression using the [Face expression recognition dataset](https://www.kaggle.com/datasets/jonathanoheix/face-expression-recognition-dataset)[[1]](#1). 
+In this project, we will train a classifier model to assign an emotion such as anger or happiness to a given expression using the [Face expression recognition dataset](https://www.kaggle.com/datasets/jonathanoheix/face-expression-recognition-dataset) [[1]](#1). 
 This dataset includes grayscale pictures of 7 different expression categories, namely: anger, disgust, fear, sadness, happy, neutral and surprise. 
 We will then optimize this model for mobile and develop an android mobile app that uses this model to recognize facial expressions based on photos taken on the phone and/or real-time camera feed of the device.
 
@@ -15,7 +15,7 @@ Facial Expression Recognition (FER) is a task in Computer Vision which aims to a
 ## Problem Description
 The aforementioned FER models are often Neural Networks that are trained on images or videos of human faces with different expressions, and then tested and used to categorize emotions given a new set of such images or videos. The training data are often divided into several different categories of emotions (of different complexities). In this project, we will be using the “Face Expression Recognition Dataset” [[1]](#1) which includes images of 7 fundamental expression categories, namely: Angry, disgusted, fearful, sad, happy, neutral and surprised. The bar plot below shows the number of available data for each category of the dataset. It is noticeable that the number of data present especially for the class “disgusted” is significantly lower than that of other classes. This will be discussed and handled further in the “Experiments” section.
 
-[IMAGE]
+![Alt text](readme_images/UnaugDataset.png)
 
 The aim of this project is to solve the problem of accurately and efficiently classifying any given facial expression into one of the categories mentioned above in real-time. To achieve this, we will train a classifier model on the training data provided by the aforementioned Face Expression Recognition dataset. After training, this model should be capable of successful classification of a given facial expression into one of the corresponding emotion categories without being (negatively) affected by factors such as the quality and resolution of the given image, the lighting, the person’s background and skin color/ethnicity, etc. 
 
@@ -25,11 +25,12 @@ To achieve the goal of accurate and efficient real-time facial expressions recog
 ## Experiments
 To address the data imbalance regarding the "disgusted" category of the training data from the "Face Expression Recognition" dataset, we decided to create additional synthetic images of faces depicting disgusted expression. For this purpose, we train a StarGan [[3]](#3) generative adversarial network to translate between the different emotions in the dataset, with the ultimate goal of generating synthetic "disgusted" images by translating images of other emotions. Some examples of these generated images can be seen below where the image on the left is the original and the image on the right is the translated image depicting a disgusted face. 
 
-[IMAGES]
+![Alt text](readme_images/Samples1.png)
+![Alt text](readme_images/Samples2.png)
 
 To balance the dataset, we chose to augment the "disgusted" class until its number of samples is the same as the "fear class". The sample distribution after adding the new synthetic images is depicted in the bar plot below. As it can be seen, it is now more balanced regarding the number of data for each of the 7 emotion categories. We will test both the augmented and unaugmented datasets with the chosen models to ascertain the improvement augmentation brings to the table.
 
-[IMAGE]
+![Alt text](readme_images/AugmentedDataset.png)
 
 To find an appropriate model which fulfills the requirements for the proposed solution, we experimented with two different Vision Transformer (ViT) models which process images using self-attention mechanisms to capture dependencies and relations between image patches. This self-attention mechanism allows ViT to capture global dependencies better compared to e.g. Convolutional Neural Networks (CNNs) that extract features hierarchically using their convolutional layers. Such global dependencies may be of importance in determining correct facial expression as is the goal of this project and therefore we decided to train and use two different sized ViT models (ViTtiny and ViTsmall) to compare their performance (also on the mobile app). These models achieve faster inference speeds and a smaller memory footprint compared to the base ViT by compromising on the number of attention layers, the hidden embedding size, and the number of attention heads respectively. Other models like "CoaT-Lite tiny" and "MobileNet v2" were also trained but without any extensive testing. Additionally, we tested different augmentation functions for the developed FER model (used for online on-the-fly image augmentation at train time). We tested the following functions for both ViT models trained on the augmented dataset: 
 * Cutout: an image augmentation strategy that randomly masks out square regions of input during training (object occlusion).
@@ -66,11 +67,21 @@ ViTsmall:
 ## Results (Qualitative)
 Additionally, we rendered the Class Activation Maps (CAM) for two highlighted images in order to visualize what models trained using different online activations learn to focus their attention on. 
 
-[IMAGES]
+Cutmix:
+![Alt text](readme_images/Cutmix_CAM.png)
+
+Cutout:
+![Alt text](readme_images/Cutout_CAM.png)
+
+Fmix:
+![Alt text](readme_images/Fmix_CAM.png)
+
+Mixup:
+![Alt text](readme_images/mixup_CAM.png)
 
 The images on the left at each of these figures give a practical example for the method definition as described in the “Experiments”' section. On the right of each figure, the attention of the model can be seen to be directed to different facial features such as the eyes (e.g. in cutmix and fmix), the eyebrows and lips (e.g. in mixup and cutmix). 
 
-[IMAGE]
+![Alt text](readme_images/app_interface.png)
 
 Above we can see pictures from the app. The user has the possibility to turn real time detection on or off. When on, the app continuously does OOD detection and inference and displays the result below the image. When real time detection is off, the user has the possibility to capture an image and once OOD detection is run, they have the possibility of detecting the emotion. There are currently 3 models the user can choose from: ViT-small, ViT-tiny and MobileNet-V2. For OOD detection, the MobileNet-V2 features are used.
 
@@ -88,9 +99,11 @@ This project experimented with a few classifier models for facial expressions wi
 <a id="1">[1]</a> 
 Jonathan Oheix.
 Face Expression Recognition Dataset <https://www.kaggle.com/datasets/jonathanoheix/face-expression-recognition-dataset>.
+
 <a id="2">[2]</a> 
 European Data Protection Supervisor (EDPS) TechDispatch. 
 Facial Emotions Recogntion, Issue 1 (2021), P.2.
+
 <a id="3">[3]</a> 
 Yunjey Choi et al.
 StarGAN: Unified Generative Adversarial Networks for Multi-Domain Image-to-Image Translation.
